@@ -31,12 +31,35 @@ contract SwappyRegister is Ownable{
         uint256 state;
         uint256 buyOrSell;
         uint256 expiration;
+        string refCode;
         uint256 lastUpdate;}
-
 
     mapping(address => mapping(string => dbTx)) private storedTx;
 
-    function orderTx(address walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, uint256 buyOrSell, uint256 expiration) public onlyOwner {  
+    string public dailyUSDTSwapped = "0";
+    string public totalUSDTSwapped = "0";
+
+    function updateDailySwapped(string memory amount) public onlyOwner {
+        dailyUSDTSwapped = amount;}
+
+    function updateTotalSwapped(string memory amount) public onlyOwner {
+        totalUSDTSwapped = amount;}
+
+    function getState(uint256 state) public pure returns (string memory txState) {
+        require(state >= 0, "The state must be between 0 and 3");
+        require(state <= 3, "The state must be between 0 and 3");
+
+        if(state == 0){
+            txState = "Tx started";}
+        if(state == 1){
+            txState = "Tx completed";}
+        if(state == 2){
+            txState = "Tx error";}
+        if(state == 3){
+            txState = "Tx awaiting purchase order";}
+        return(txState);}
+
+    function orderTx(address walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, uint256 buyOrSell, uint256 expiration, string memory refCode) public onlyOwner {  
 
         storedTx[walletAddress][hashFrom].hashFrom = hashFrom;
         storedTx[walletAddress][hashFrom].blockchainFrom = blockchainFrom;
@@ -49,9 +72,10 @@ contract SwappyRegister is Ownable{
         storedTx[walletAddress][hashFrom].state = 0;
         storedTx[walletAddress][hashFrom].buyOrSell = buyOrSell;
         storedTx[walletAddress][hashFrom].expiration = expiration;
+        storedTx[walletAddress][hashFrom].refCode = refCode;
         storedTx[walletAddress][hashFrom].lastUpdate = block.timestamp;}
 
-    function storeTx(address walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo) public onlyOwner {  
+    function storeTx(address walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, string memory refCode) public onlyOwner {  
 
         storedTx[walletAddress][hashFrom].hashFrom = hashFrom;
         storedTx[walletAddress][hashFrom].blockchainFrom = blockchainFrom;
@@ -62,6 +86,7 @@ contract SwappyRegister is Ownable{
         storedTx[walletAddress][hashFrom].tokenTo = tokenTo;
 
         storedTx[walletAddress][hashFrom].state = 0;
+        storedTx[walletAddress][hashFrom].refCode = refCode;
         storedTx[walletAddress][hashFrom].lastUpdate = block.timestamp;}
 
     function updateTx(address walletAddress, string memory hashFrom, string memory hashTo, string memory amountTo) public onlyOwner {  
