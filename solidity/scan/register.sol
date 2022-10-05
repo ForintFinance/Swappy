@@ -18,7 +18,7 @@ import "./library.sol";
 contract SwappyRegister is Ownable{
     using Strings for uint256;
 
-    struct dbTx{
+    struct dbTx {
         string hashFrom;
         uint256 blockchainFrom;
         string tokenFrom;
@@ -34,7 +34,16 @@ contract SwappyRegister is Ownable{
         string refCode;
         uint256 lastUpdate;}
 
-    mapping(address => mapping(string => dbTx)) private storedTx;
+    struct stateTx {
+        string state;}
+
+    mapping(string => mapping(uint => string)) public refTx;
+    mapping(string => uint) public totalRefTx;
+    mapping(string => mapping(string => dbTx)) private storedTx;
+    mapping(uint => stateTx) private storedState;
+
+    uint256 public totalTxStored;
+    
 
     string public dailyUSDTSwapped = "0";
     string public totalUSDTSwapped = "0";
@@ -45,21 +54,18 @@ contract SwappyRegister is Ownable{
     function updateTotalSwapped(string memory amount) public onlyOwner {
         totalUSDTSwapped = amount;}
 
-    function getState(uint256 state) public pure returns (string memory txState) {
-        require(state >= 0, "The state must be between 0 and 3");
-        require(state <= 3, "The state must be between 0 and 3");
+    function setState(uint256 idState, string memory txState) public onlyOwner {
+        storedState[idState].state = txState;}
 
-        if(state == 0){
-            txState = "Tx started";}
-        if(state == 1){
-            txState = "Tx completed";}
-        if(state == 2){
-            txState = "Tx error";}
-        if(state == 3){
-            txState = "Tx awaiting purchase order";}
-        return(txState);}
+    function getState(uint256 idState) public view returns (string memory txState) {
+        require(bytes(storedState[idState].state).length > 0, "Tx State not inserted");
+        return(storedState[idState].state);}
 
-    function orderTx(address walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, uint256 buyOrSell, uint256 expiration, string memory refCode) public onlyOwner {  
+    function storeTxRef(string memory refCode, string memory hashFrom) private onlyOwner {
+        refTx[refCode][totalRefTx[refCode]] = hashFrom;
+        totalRefTx[refCode] += 1;}
+
+    function orderTx(string memory walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, uint256 buyOrSell, uint256 expiration, string memory refCode) public onlyOwner {  
 
         storedTx[walletAddress][hashFrom].hashFrom = hashFrom;
         storedTx[walletAddress][hashFrom].blockchainFrom = blockchainFrom;
@@ -75,7 +81,7 @@ contract SwappyRegister is Ownable{
         storedTx[walletAddress][hashFrom].refCode = refCode;
         storedTx[walletAddress][hashFrom].lastUpdate = block.timestamp;}
 
-    function storeTx(address walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, string memory refCode) public onlyOwner {  
+    function storeTx(string memory walletAddress, string memory hashFrom, uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, string memory refCode) public onlyOwner {  
 
         storedTx[walletAddress][hashFrom].hashFrom = hashFrom;
         storedTx[walletAddress][hashFrom].blockchainFrom = blockchainFrom;
@@ -87,9 +93,14 @@ contract SwappyRegister is Ownable{
 
         storedTx[walletAddress][hashFrom].state = 0;
         storedTx[walletAddress][hashFrom].refCode = refCode;
-        storedTx[walletAddress][hashFrom].lastUpdate = block.timestamp;}
+        storedTx[walletAddress][hashFrom].lastUpdate = block.timestamp;
+        
+        if(keccak256(abi.encodePacked((refCode))) != keccak256(abi.encodePacked(("none")))){
+            storeTxRef(refCode, hashFrom);}
 
-    function updateTx(address walletAddress, string memory hashFrom, string memory hashTo, string memory amountTo) public onlyOwner {  
+        totalTxStored += 1;}
+        
+    function updateTx(string memory walletAddress, string memory hashFrom, string memory hashTo, string memory amountTo) public onlyOwner {  
 
         storedTx[walletAddress][hashFrom].hashTo = hashTo;
         storedTx[walletAddress][hashFrom].amountTo = amountTo;
@@ -97,7 +108,7 @@ contract SwappyRegister is Ownable{
         storedTx[walletAddress][hashFrom].state = 1;
         storedTx[walletAddress][hashFrom].lastUpdate = block.timestamp;}
 
-    function getTx(address walletAddress, string memory hashFrom) public view returns (uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, string memory amountTo, uint256 state, uint256 buyOrSell, uint256 expiration, uint256 lastUpdate) {
+    function getTx(string memory walletAddress, string memory hashFrom) public view returns (uint256 blockchainFrom, string memory tokenFrom, string memory amountFrom, string memory walletOffchain, uint256 blockchainTo, string memory tokenTo, string memory amountTo, uint256 state, uint256 buyOrSell, uint256 expiration, uint256 lastUpdate) {
         
         require(bytes(storedTx[walletAddress][hashFrom].hashFrom).length > 0, "TX not registered");
         hashFrom = storedTx[walletAddress][hashFrom].hashFrom;
