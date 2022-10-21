@@ -15,10 +15,10 @@ Crypto gift cards are digital gift cards that contain crypto credit instead of t
 
 ```mermaid
 graph LR
-A[Square Rect] -- Link text --> B((Circle))
 A --> C(Round Rect)
-B --> D{Rhombus}
-C --> D
+A --> C(Round Rect)
+A --> C(Round Rect)
+A --> C(Round Rect)
 ```
     
 ![Swappy Card FlowChart](https://images.pexels.com/photos/14111149/pexels-photo-14111149.png)
