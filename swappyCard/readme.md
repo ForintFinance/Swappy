@@ -18,7 +18,7 @@ graph LR
 A --> B(Swappy Card)
 B --> C{is the purchase from banned list countries?}
 C -- Yes --> D(the payment is blocked directly on Stripe)
-C -- No --> E{Check whether the country is high-risk </n> or risk-free and proceed with verification of amounts and number of transactions}
+C -- No --> E{<n> Check whether the country is high-risk </n> <n> or risk-free and proceed with verification of amounts and number of transactions </n>}
 ```
     
 ![Swappy Card FlowChart](https://images.pexels.com/photos/14111149/pexels-photo-14111149.png)
