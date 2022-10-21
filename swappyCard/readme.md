@@ -11,16 +11,7 @@ Crypto gift cards are digital gift cards that contain crypto credit instead of t
 |**Swappy £100** |`£5.00`                        |`£95.00`                     |
 |**Swappy £250** |`£10.00`                       |`£240.00`                    |
 
-## Flowchart
-
-```mermaid
-graph LR
-A --> B(Swappy Card)
-B --> C{is the purchase from banned list countries?}
-C -- Yes --> D(the payment is blocked directly on Stripe)
-C -- No --> E{<n> Check whether the country is high-risk </n> <n> or risk-free and proceed with verification of amounts and number of transactions </n>}
-```
-    
+## Flowchart    
 ![Swappy Card FlowChart](https://images.pexels.com/photos/14111149/pexels-photo-14111149.png)
 
 
