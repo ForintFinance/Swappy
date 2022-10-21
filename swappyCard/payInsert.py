@@ -11,11 +11,11 @@ stripe.api_key      = "---"
 
 
 #   Error List:
-#       S000000001 -> Stripe connection aborted
-#       S000000002 -> MySQL connection aborted
-#       S000000003 -> Fail to catch GBP conversion rate
-#       S000000004 -> Check idPayment on DB fail
-#       S000000005 -> Fail to insert Tx on DB
+#   S000000001 -> Stripe connection aborted
+#   S000000002 -> MySQL connection aborted
+#   S000000003 -> Fail to catch GBP conversion rate
+#   S000000004 -> Check idPayment on DB fail
+#   S000000005 -> Fail to insert Tx on DB
 
 while True:
     
