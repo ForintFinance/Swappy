@@ -13,6 +13,7 @@ Crypto gift cards are digital gift cards that contain crypto credit instead of t
 
 ## Flowchart
 
+```mermaid
 sequenceDiagram
     participant Alice
     participant Bob
@@ -24,6 +25,7 @@ sequenceDiagram
     John-->>Alice: Great!
     John->>Bob: How about you?
     Bob-->>John: Jolly good!
+    ```
     
 ![Swappy Card FlowChart](https://images.pexels.com/photos/14111149/pexels-photo-14111149.png)
 
