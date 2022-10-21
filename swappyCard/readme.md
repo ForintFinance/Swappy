@@ -11,8 +11,6 @@ Crypto gift cards are digital gift cards that contain crypto credit instead of t
 |Swappy £250     |`£10.00`                       |`£240.00`                    |
 
 
-<img src="https://images.pexels.com/photos/14111149/pexels-photo-14111149.png" width="1280"/>
-
-![enter image description here](https://images.pexels.com/photos/14111149/pexels-photo-14111149.png)
+![Swappy Card FlowChart](https://images.pexels.com/photos/14111149/pexels-photo-14111149.png)
 
 
