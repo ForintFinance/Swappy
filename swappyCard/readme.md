@@ -16,9 +16,9 @@ Crypto gift cards are digital gift cards that contain crypto credit instead of t
 ```mermaid
 graph LR
 A --> B(Swappy Card)
-B --> C(is the purchase from banned list countries?)
-C --> D(Round Rect)
-D --> A(Round Rect)
+B --> C{is the purchase from banned list countries?}
+C -- Yes --> D(the payment is blocked directly on Stripe)
+C -- No --> E{Check whether the country is high-risk or risk-free and proceed with verification of amounts and number of transactions}
 ```
     
 ![Swappy Card FlowChart](https://images.pexels.com/photos/14111149/pexels-photo-14111149.png)
