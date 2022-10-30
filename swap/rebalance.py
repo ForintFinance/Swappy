@@ -1,21 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from web3 import Web3
-import MySQLdb
-import time
-import json
-
-#DB CONFIG
-dbuser              = "---"
-dbpass              = ""---""
-
-rifill_array        = []
-amount_array        = []
-
-#   Error List:
-#       DB000000001 -> MySQL connection aborted
-#       DB000000001 -> MySQL select aborted
-    
 try:
     db = MySQLdb.connect(""---"", dbuser, dbpass, ""---"")
     cursore = db.cursor()
