@@ -32,11 +32,8 @@ try:
                 chain_id               = int(reading[0])
                 rpc                    = str(reading[1])
                 availability           = float(reading[2])
+                
                 print("Chain Id: " + str(chain_id) + " Amount : $" + str(availability))
-                
-                
-                
-            
                 
                 if(availability < 800):
                     print("Chain Id: " + str(chain_id) + " <- Rebalance In needed")
@@ -47,7 +44,6 @@ try:
                     print("Chain Id: " + str(chain_id) + " -> Rebalance Out needed")
                     amount_extra = availability - 1000
                     print("Extra amount: $" + str(amount_extra))
-                    
                     
                 rifill_array[nr_row] = chain_id
                 amount_array[nr_row] = amount_extra
