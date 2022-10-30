@@ -9,8 +9,8 @@ import json
 dbuser              = "---"
 dbpass              = ""---""
 
-rifill_array        = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-amount_array        = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+rifill_array        = []
+amount_array        = []
 
 #   Error List:
 #       DB000000001 -> MySQL connection aborted
@@ -22,10 +22,11 @@ try:
     try:
         select_chains = "SELECT "---", "---", "---" FROM "---" ORDER BY "---" ASC"
         cursore.execute(select_chains)
-        rifill_array        = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        amount_array        = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        nr_row              = 0
+        
+        rifill_array        = []
+        amount_array        = []
         amount_extra        = 0
+        
         for row in cursore.fetchall():
             if row is not None:
                 reading = row
@@ -45,10 +46,8 @@ try:
                     amount_extra = availability - 1000
                     print("Extra amount: $" + str(amount_extra))
                     
-                rifill_array[nr_row] = chain_id
-                amount_array[nr_row] = amount_extra
-                
-                nr_row = nr_row + 1 
+                rifill_array.append(chain_id)
+                amount_array.append(amount_extra)
                 
                 print(rifill_array)
                 print(amount_array)
