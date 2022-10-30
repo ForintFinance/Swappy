@@ -20,7 +20,7 @@ try:
     db = MySQLdb.connect(""---"", dbuser, dbpass, ""---"")
     cursore = db.cursor()
     try:
-        select_chains = "SELECT "---", "---", "---" FROM "---" ORDER BY availability ASC"
+        select_chains = "SELECT "---", "---", "---" FROM "---" ORDER BY "---" ASC"
         cursore.execute(select_chains)
         rifill_array        = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         amount_array        = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
