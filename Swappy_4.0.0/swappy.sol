@@ -29,6 +29,24 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         _unpause();
     }
 
+    address public contractManager;
+    event ContractManagerChanged(address indexed previousManager, address indexed newManager);
+
+    modifier onlyOwnerOrContractManager() {
+        require(msg.sender == owner() || msg.sender == contractManager, "Caller is not authorized");
+        _;
+    }
+
+    function setContractManager(address _newManager) public onlyOwnerOrContractManager {
+        require(_newManager != address(0), "New manager is the zero address");
+        emit ContractManagerChanged(contractManager, _newManager);
+        contractManager = _newManager;
+    }
+
+    function getContractManager() public view returns (address) {
+        return contractManager;
+    }
+
     // 4INT SETTINGS
 
     IERC20 public forintToken;
@@ -37,12 +55,12 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     uint256 public usdtDecimals;
     uint256 public minimumClaimAmount; 
 
-    function setForintAddress(address _forintToken, uint256 _forintDecimals) public onlyOwner {
+    function setForintAddress(address _forintToken, uint256 _forintDecimals) public onlyOwnerOrContractManager {
         forintToken = IERC20(_forintToken);
         forintDecimals = _forintDecimals;
     }
 
-    function setUsdtAddress(address _usdtToken, uint256 _usdtDecimals, uint256 _minimumClaimAmount) public onlyOwner {
+    function setUsdtAddress(address _usdtToken, uint256 _usdtDecimals, uint256 _minimumClaimAmount) public onlyOwnerOrContractManager {
         usdtToken = IERC20(_usdtToken);
         usdtDecimals = _usdtDecimals;
         minimumClaimAmount = _minimumClaimAmount * (10 ** _usdtDecimals);
@@ -56,7 +74,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     uint256 public goldThreshold = 50000;   
     uint256 public platinumThreshold = 250000; 
 
-    function setThreshold(uint256 _silver, uint256 _gold, uint256 _platinum) public onlyOwner {
+    function setThreshold(uint256 _silver, uint256 _gold, uint256 _platinum) public onlyOwnerOrContractManager {
         silverThreshold = _silver;
         goldThreshold = _gold;
         platinumThreshold = _platinum;
@@ -67,7 +85,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     uint256 public platinumCashback = 100; 
     uint256 public decimalsCashback = 2;
 
-    function setCashback(uint256 _silver, uint256 _gold, uint256 _platinum, uint256 _decimals) public onlyOwner {
+    function setCashback(uint256 _silver, uint256 _gold, uint256 _platinum, uint256 _decimals) public onlyOwnerOrContractManager {
         silverCashback = _silver;
         goldCashback = _gold;
         platinumCashback = _platinum;
@@ -92,7 +110,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
 
     mapping(string => bool) private blockchainSupported;
 
-    function addBlockchain(string memory _blockchain) public onlyOwner {
+    function addBlockchain(string memory _blockchain) public onlyOwnerOrContractManager {
         require(!blockchainSupported[_blockchain], "Blockchain already supported");
         blockchainSupported[_blockchain] = true;
     }
@@ -101,7 +119,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         return blockchainSupported[_blockchain];
     }
 
-    function removeBlockchain(string memory _blockchain) public onlyOwner {
+    function removeBlockchain(string memory _blockchain) public onlyOwnerOrContractManager {
         require(blockchainSupported[_blockchain], "Blockchain not found");
         blockchainSupported[_blockchain] = false;
     }
@@ -110,7 +128,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     
     uint256 public maxAddressLength = 100;
 
-    function setMaxAddressLength(uint256 _maxAddressLength) public onlyOwner {
+    function setMaxAddressLength(uint256 _maxAddressLength) public onlyOwnerOrContractManager {
         maxAddressLength = _maxAddressLength;
     }
     
@@ -157,7 +175,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     mapping(address => FiatTransaction[]) public userFiatTransactions;
     mapping(string => bool) public registeredTransactionIds;
     
-    function addFiatTransaction(address _userAddress, string memory _transactionId, uint256 _usdtAmountWei, uint256 _extraCashbackAmountWei, string memory _description, uint _timestamp) public onlyOwner nonReentrant {
+    function addFiatTransaction(address _userAddress, string memory _transactionId, uint256 _usdtAmountWei, uint256 _extraCashbackAmountWei, string memory _description, uint _timestamp) public onlyOwnerOrContractManager nonReentrant {
         require(!registeredTransactionIds[_transactionId], "Transaction already registered");
         uint256 _cashback = getCashback(_userAddress);
         uint256 _cashbackAmountWei = _usdtAmountWei * _cashback / (10**decimalsCashback);
@@ -178,12 +196,12 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     mapping(address => uint256) public redeemableBalance;
     mapping(address => uint256) public redeemableForintBalance;
 
-    function addRedeemableBalance(address _userAddress, uint256 _amount, uint256 _forintAmount) public onlyOwner nonReentrant {
+    function addRedeemableBalance(address _userAddress, uint256 _amount, uint256 _forintAmount) public onlyOwnerOrContractManager nonReentrant {
         redeemableBalance[_userAddress] += _amount;
         redeemableForintBalance[_userAddress] += _forintAmount;
     }
 
-    function editRedeemableBalance(address _userAddress, uint256 _amount, uint256 _forintAmount) public onlyOwner nonReentrant {
+    function editRedeemableBalance(address _userAddress, uint256 _amount, uint256 _forintAmount) public onlyOwnerOrContractManager nonReentrant {
         redeemableBalance[_userAddress] = _amount;
         redeemableForintBalance[_userAddress] = _forintAmount;
     }
