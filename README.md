@@ -1,7 +1,7 @@
 
 # Swappy Blockchain Development
 
-## About Swappy
+## About Forint Finance
 
 [Forint Finance ltd](https://forintfinance.com/) is a pioneering company in the blockchain development arena, offering innovative solutions for businesses and individuals seeking to leverage the power and potential of blockchain technology. Swappy specializes in creating custom blockchain applications, smart contracts, and decentralized applications (dApps) that cater to a variety of needs and industries.
 
