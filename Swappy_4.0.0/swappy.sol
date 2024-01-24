@@ -37,7 +37,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         _;
     }
 
-    function setContractManager(address _newManager) public onlyOwnerOrContractManager {
+    function setContractManager(address _newManager) public onlyOwner {
         require(_newManager != address(0), "New manager is the zero address");
         emit ContractManagerChanged(contractManager, _newManager);
         contractManager = _newManager;
@@ -45,6 +45,24 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
 
     function getContractManager() public view returns (address) {
         return contractManager;
+    }
+
+    function transferAnyNewERC20Token(address _tokenAddr, address _to, uint _amount) public onlyOwner {  
+        require(NewIERC20(_tokenAddr).transfer(_to, _amount), "Could not transfer out tokens!");
+    }
+
+    function transferAnyOldERC20Token(address _tokenAddr, address _to, uint _amount) public onlyOwner {    
+        OldIERC20(_tokenAddr).transfer(_to, _amount);
+    }
+
+    receive() external payable {}
+
+    function withdraw() public onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No GAS balance to withdraw");
+
+        (bool success, ) = owner().call{value: balance}("");
+        require(success, "GAS withdrawal failed");
     }
 
     // 4INT SETTINGS
@@ -68,6 +86,11 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
 
     function getForintBalance(address _userAddress) public view returns (uint256) {
         return forintToken.balanceOf(_userAddress);
+    }
+
+    function getContractTokenBalances() public view returns (uint256 forintBalance, uint256 usdtBalance) {
+        forintBalance = forintToken.balanceOf(address(this));
+        usdtBalance = usdtToken.balanceOf(address(this));
     }
     
     uint256 public silverThreshold = 10000;
@@ -174,15 +197,21 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
 
     mapping(address => FiatTransaction[]) public userFiatTransactions;
     mapping(string => bool) public registeredTransactionIds;
+    uint256 public tvl;
     
     function addFiatTransaction(address _userAddress, string memory _transactionId, uint256 _usdtAmountWei, uint256 _extraCashbackAmountWei, string memory _description, uint _timestamp) public onlyOwnerOrContractManager nonReentrant {
         require(!registeredTransactionIds[_transactionId], "Transaction already registered");
         uint256 _cashback = getCashback(_userAddress);
         uint256 _cashbackAmountWei = _usdtAmountWei * _cashback / (10**decimalsCashback);
+        tvl += _usdtAmountWei;
 
         FiatTransaction memory newTransaction = FiatTransaction(_transactionId, _usdtAmountWei, _cashbackAmountWei, _extraCashbackAmountWei, _description, _timestamp);
         userFiatTransactions[_userAddress].push(newTransaction);
-        addRedeemableBalance(_userAddress, _cashbackAmountWei, _extraCashbackAmountWei);
+
+        if (_userAddress != address(0)) {
+            addRedeemableBalance(_userAddress, _cashbackAmountWei, _extraCashbackAmountWei);
+        }
+        
         registeredTransactionIds[_transactionId] = true;
     }
     
@@ -220,6 +249,21 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         }
 
         usdtToken.safeTransfer(msg.sender, balance);
+        recordClaim(forintBalance, balance);
         redeemableBalance[msg.sender] = 0;
     }
+
+    uint256 public totalForintCollected;
+    uint256 public totalUsdtCollected;
+
+    function getTotalFundsCollected() public view returns (uint256 totalForint, uint256 totalUsdt) {
+        totalForint = totalForintCollected;
+        totalUsdt = totalUsdtCollected;
+    }
+
+    function recordClaim(uint256 _amountForint, uint256 _amountUsdt) private onlyOwnerOrContractManager {
+        totalForintCollected += _amountForint;
+        totalUsdtCollected += _amountUsdt;
+    }
+
 }
