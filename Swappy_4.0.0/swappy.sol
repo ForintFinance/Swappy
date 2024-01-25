@@ -197,13 +197,19 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
 
     mapping(address => FiatTransaction[]) public userFiatTransactions;
     mapping(string => bool) public registeredTransactionIds;
-    uint256 public tvl;
+    uint256 public totalUsdtVolume;
+    uint256 public totalTx;
+
+    function getStats () public view returns (uint256, uint256) {
+        return (totalTx, totalUsdtVolume);
+    }
     
     function addFiatTransaction(address _userAddress, string memory _transactionId, uint256 _usdtAmountWei, uint256 _extraCashbackAmountWei, string memory _description, uint _timestamp) public onlyOwnerOrContractManager nonReentrant {
         require(!registeredTransactionIds[_transactionId], "Transaction already registered");
         uint256 _cashback = getCashback(_userAddress);
         uint256 _cashbackAmountWei = _usdtAmountWei * _cashback / (10**decimalsCashback);
-        tvl += _usdtAmountWei;
+        totalUsdtVolume += _usdtAmountWei;
+        totalTx += 1;
 
         FiatTransaction memory newTransaction = FiatTransaction(_transactionId, _usdtAmountWei, _cashbackAmountWei, _extraCashbackAmountWei, _description, _timestamp);
         userFiatTransactions[_userAddress].push(newTransaction);
@@ -211,12 +217,27 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         if (_userAddress != address(0)) {
             addRedeemableBalance(_userAddress, _cashbackAmountWei, _extraCashbackAmountWei);
         }
-        
+
         registeredTransactionIds[_transactionId] = true;
     }
     
-    function getFiatTransactions(address user) public view returns (FiatTransaction[] memory) {
-        return userFiatTransactions[user];
+    function getFiatTransactions(address user, uint start, uint limit) public view returns (FiatTransaction[] memory) {
+        uint totalTransactions = userFiatTransactions[user].length;
+        if (start >= totalTransactions) {
+            return new FiatTransaction[](0);
+        }
+
+        uint end = start + limit;
+        if (end > totalTransactions) {
+            end = totalTransactions;
+        }
+
+        FiatTransaction[] memory transactions = new FiatTransaction[](end - start);
+        for (uint i = start; i < end; i++) {
+            transactions[i - start] = userFiatTransactions[user][i];
+        }
+
+        return transactions;
     }
 
     // CLAIM
@@ -256,9 +277,8 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     uint256 public totalForintCollected;
     uint256 public totalUsdtCollected;
 
-    function getTotalFundsCollected() public view returns (uint256 totalForint, uint256 totalUsdt) {
-        totalForint = totalForintCollected;
-        totalUsdt = totalUsdtCollected;
+    function getTotalFundsCollected() public view returns (uint256, uint256) {
+        return (totalForintCollected, totalUsdtCollected);
     }
 
     function recordClaim(uint256 _amountForint, uint256 _amountUsdt) private onlyOwnerOrContractManager {
