@@ -1,5 +1,4 @@
-"""
-# Blockchain Address Registry Contract Documentation
+# Blockchain Address Registry Contract Swappy Fiat 4.0.0 Documentation
 
 ## Contract Overview
 The `BlockchainAddressRegistry` contract is designed to manage blockchain addresses, handle fiat transactions, and implement a cashback system based on user balances. It interacts with ERC20 tokens and includes functionalities such as pausing operations, managing user tiers, and processing claims.
@@ -57,7 +56,6 @@ The `BlockchainAddressRegistry` contract is designed to manage blockchain addres
 The contract includes robust security features like reentrancy guards and pausability. It also utilizes SafeERC20 for secure token transfers.
 
 **Note**: This documentation provides an overview of the contract functionalities. For detailed implementation and interaction, refer to the contract's source code.
-"""
 
 ## Smart Contract Audit Report
 This report presents the findings from an audit of the Smart Contract provided, focusing on identifying security vulnerabilities, design pattern adherence, code efficiency, and overall contract functionality.
