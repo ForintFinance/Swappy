@@ -204,7 +204,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         return (totalTx, totalUsdtVolume);
     }
     
-    function addFiatTransaction(address _userAddress, string memory _transactionId, uint256 _usdtAmountWei, uint256 _extraCashbackAmountWei, string memory _description, uint _timestamp) public onlyOwnerOrContractManager nonReentrant {
+    function addFiatTransaction(address _userAddress, string memory _transactionId, uint256 _usdtAmountWei, uint256 _extraCashbackAmountWei, string memory _description, uint _timestamp) public onlyOwnerOrContractManager {
         require(!registeredTransactionIds[_transactionId], "Transaction already registered");
         uint256 _cashback = getCashback(_userAddress);
         uint256 _cashbackAmountWei = _usdtAmountWei * _cashback / (10**decimalsCashback);
@@ -215,7 +215,8 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         userFiatTransactions[_userAddress].push(newTransaction);
 
         if (_userAddress != address(0)) {
-            addRedeemableBalance(_userAddress, _cashbackAmountWei, _extraCashbackAmountWei);
+            redeemableBalance[_userAddress] += _cashbackAmountWei;
+            redeemableForintBalance[_userAddress] += _extraCashbackAmountWei;
         }
 
         registeredTransactionIds[_transactionId] = true;
@@ -246,12 +247,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     mapping(address => uint256) public redeemableBalance;
     mapping(address => uint256) public redeemableForintBalance;
 
-    function addRedeemableBalance(address _userAddress, uint256 _amount, uint256 _forintAmount) public onlyOwnerOrContractManager nonReentrant {
-        redeemableBalance[_userAddress] += _amount;
-        redeemableForintBalance[_userAddress] += _forintAmount;
-    }
-
-    function editRedeemableBalance(address _userAddress, uint256 _amount, uint256 _forintAmount) public onlyOwnerOrContractManager nonReentrant {
+    function editRedeemableBalance(address _userAddress, uint256 _amount, uint256 _forintAmount) public onlyOwnerOrContractManager {
         redeemableBalance[_userAddress] = _amount;
         redeemableForintBalance[_userAddress] = _forintAmount;
     }
@@ -270,7 +266,8 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
         }
 
         usdtToken.safeTransfer(msg.sender, balance);
-        recordClaim(forintBalance, balance);
+        totalForintCollected += forintBalance;
+        totalUsdtCollected += balance;
         redeemableBalance[msg.sender] = 0;
     }
 
@@ -279,11 +276,6 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
 
     function getTotalFundsCollected() public view returns (uint256, uint256) {
         return (totalForintCollected, totalUsdtCollected);
-    }
-
-    function recordClaim(uint256 _amountForint, uint256 _amountUsdt) private onlyOwnerOrContractManager {
-        totalForintCollected += _amountForint;
-        totalUsdtCollected += _amountUsdt;
     }
 
 }
