@@ -207,7 +207,7 @@ contract BlockchainAddressRegistry is Ownable, ReentrancyGuard, Pausable {
     function addFiatTransaction(address _userAddress, string memory _transactionId, uint256 _usdtAmountWei, uint256 _extraCashbackAmountWei, string memory _description, uint _timestamp) public onlyOwnerOrContractManager {
         require(!registeredTransactionIds[_transactionId], "Transaction already registered");
         uint256 _cashback = getCashback(_userAddress);
-        uint256 _cashbackAmountWei = _usdtAmountWei * _cashback / (10**decimalsCashback);
+        uint256 _cashbackAmountWei = _usdtAmountWei * _cashback / (10**(decimalsCashback + 2));
         totalUsdtVolume += _usdtAmountWei;
         totalTx += 1;
 
